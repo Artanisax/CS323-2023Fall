@@ -85,16 +85,22 @@ bool is_letter(char x)
 bool end_of_line(char x)
 { return x == '\n' || x == '\r' || x == '\0'; }
 
+bool valid(char ch)
+{ return is_empty(ch) || is_sign(ch) || is_digit(ch) || is_letter(ch) || end_of_line(ch); }
+
 void print_sign(char *s, size_t len)
 {
     for (size_t start = 0, length = min(SIGN_LEN, len); start < len; length--)
         for (int i = 0; i < SIGN_NUM; i++)
+        {
             if (strncmp(s + start, KEY_SIGN[i], length) == 0)
             {
                 cout << SIGN_NAME[i] << ' ';
                 start += length;
                 length = min(SIGN_LEN, len - start);
+                break;
             }
+        }
 }
 
 void print_word(char *s, size_t len)
@@ -114,11 +120,11 @@ void analyze(FILE *f)
     char *line = new char[MAX_LEN];
     while (fgets(line, MAX_LEN, f))
     {
-        size_t start = 0;
-        for (size_t p = 0, state = STATE::EMPTY; !end_of_line(line[p]); p++)
+        size_t p = 0, state = STATE::EMPTY, start = 0;
+        while (true)
         {
             char ch = line[p];
-            if (!is_empty(ch) && !is_sign(ch) && !is_digit(ch) && !is_letter(ch))
+            if (!valid(ch))
                 goto ERROR;
             switch (state)
             {
@@ -140,7 +146,7 @@ void analyze(FILE *f)
                     if (!is_sign(ch))
                     {
                         print_sign(line + start, p - start);
-                        p--;
+                        p -= !end_of_line(ch);
                         state = STATE::EMPTY;
                     }
                     break;
@@ -150,7 +156,7 @@ void analyze(FILE *f)
                         if (is_letter(ch))
                             goto ERROR;
                         cout << "INT ";
-                        p--;
+                        p -= !end_of_line(ch);
                         state = STATE::EMPTY;
                     }
                     break;
@@ -158,17 +164,19 @@ void analyze(FILE *f)
                     if (!is_letter(ch) && !is_digit(ch))
                     {
                         print_word(line + start, p - start);
-                        p--;
+                        p -= !end_of_line(ch);
                         state = STATE::EMPTY;
                     }
                     break;
                 default:
                     goto ERROR;
             }
+            if (end_of_line(ch))
+                break;
+            p++;
         }
         cout << endl;
     }
-    cout << endl;
     delete[] line;
     return;
 
@@ -183,13 +191,13 @@ int main()
     FILE *f;
     
     cout << "testcase 1:\n";
-    f = fopen("testcase_1.txt", "r");
+    f = fopen("test1.spl", "r");
     analyze(f);
     fclose(f);
     cout << endl;
 
     cout << "testcase 2:\n";
-    f = fopen("testcase_2.txt", "r");
+    f = fopen("test2.spl", "r");
     analyze(f);
     fclose(f);
     cout << endl;
