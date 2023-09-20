@@ -2,8 +2,8 @@
 
 ### Instruction
 
-1. Place `asignment1.cpp`, `test1.spl` and `test2.spl` in the same direction.
-2. Run the command `g++ assignment1.cpp` to compile the source code.
+1. Place `source.cpp`, `test1.spl` and `test2.spl` in the same directory.
+2. Run the command `g++ source.cpp` to compile the source code.
 3. Run the command `./a.out` to run the executable file.
 4. Then the results will be shown on the terminal.
 
