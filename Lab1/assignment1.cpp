@@ -65,6 +65,7 @@ enum STATE
     SIGN,
     DIGIT,
     LETTER,
+    POS_NEG,
 };
 
 bool is_empty(char x)
@@ -85,8 +86,14 @@ bool is_letter(char x)
 bool end_of_line(char x)
 { return x == '\n' || x == '\r' || x == '\0'; }
 
-bool valid(char ch)
-{ return is_empty(ch) || is_sign(ch) || is_digit(ch) || is_letter(ch) || end_of_line(ch); }
+bool pos_or_neg(char x)
+{ return x == '+' or x == '-'; }
+
+bool valid(char x)
+{
+    return is_empty(x) || end_of_line(x) ||
+        is_sign(x) || is_digit(x) || is_letter(x);
+}
 
 void print_sign(char *s, size_t len)
 {
@@ -129,18 +136,22 @@ void analyze(FILE *f)
             switch (state)
             {
                 case STATE::EMPTY:
+                    start = p;
                     if (is_sign(ch))
-                    {
-                        start = p;
-                        state = STATE::SIGN;
-                    }
+                        if (pos_or_neg(ch))
+                            state = STATE::POS_NEG;
+                        else
+                            state = STATE::SIGN;
                     if (is_digit(ch))
                         state = STATE::DIGIT;
                     if (is_letter(ch))
-                    {
-                        start = p;
                         state = STATE::LETTER;
-                    }
+                    break;
+                case STATE::POS_NEG:
+                    if (is_digit(ch))
+                        state = STATE::DIGIT;
+                    else
+                        state = STATE::DIGIT;
                     break;
                 case STATE::SIGN:
                     if (!is_sign(ch))
